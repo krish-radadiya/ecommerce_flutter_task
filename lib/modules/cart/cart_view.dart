@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
+import '../bottom_nav/bottom_nav_controller.dart';
 import 'cart_controller.dart';
 
 class CartView extends GetView<CartController> {
@@ -73,7 +75,16 @@ class CartView extends GetView<CartController> {
                     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () => Get.back(),
+                  onPressed: () {
+                    final bottomController = Get.find<BottomNavController>();
+
+                    // 1️⃣ Switch to Home tab
+                    bottomController.changeIndex(0);
+
+                    // 2️⃣ Reset Home tab navigation stack (Dashboard)
+                    Get.until((route) => route.isFirst, id: 1);
+                  },
+
                   child: Text(
                     "Start Shopping",
                     style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: Colors.white),

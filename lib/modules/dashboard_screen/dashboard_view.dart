@@ -49,7 +49,7 @@ class DashboardView extends GetView<DashboardController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _roundIcon(Icons.menu),
+          _roundIcon(Icons.grid_view_rounded),
           // Text(
           //   'SHOPPIFY',
           //   style: TextStyle(
@@ -67,7 +67,7 @@ class DashboardView extends GetView<DashboardController> {
   Widget _roundIcon(IconData icon) {
     return Container(
       padding: EdgeInsets.all(2.3.w),
-      decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(52.w)),
       child: Icon(icon, size: 20.sp),
     );
   }
@@ -94,6 +94,7 @@ class DashboardView extends GetView<DashboardController> {
                 ),
               ),
             ),
+            Icon(Icons.filter_list, color: Colors.grey.shade600, size: 18.sp),
           ],
         ),
       ),
@@ -371,7 +372,7 @@ class DashboardView extends GetView<DashboardController> {
 
   // Updated Special Items Data
   // ------------------ CATEGORIES ------------------
-// ------------------ CATEGORIES ------------------
+  // ------------------ CATEGORIES ------------------
   Widget _buildCategoriesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -380,11 +381,7 @@ class DashboardView extends GetView<DashboardController> {
           padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
           child: Text(
             'Category',
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
-            ),
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Colors.black87),
           ),
         ),
         Obx(() {
@@ -412,8 +409,7 @@ class DashboardView extends GetView<DashboardController> {
                 final category = categories[index];
 
                 return Obx(() {
-                  final selected =
-                      controller.selectedCategory.value == category;
+                  final selected = controller.selectedCategory.value == category;
 
                   return GestureDetector(
                     onTap: () => controller.selectCategory(category),
@@ -429,19 +425,12 @@ class DashboardView extends GetView<DashboardController> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
-                              border: Border.all(
-                                color: selected
-                                    ? AppColors.primary
-                                    : Colors.grey.shade300,
-                                width: selected ? 2 : 1.2,
-                              ),
+                              border: Border.all(color: selected ? AppColors.primary : Colors.grey.shade300, width: selected ? 2 : 1.2),
                             ),
                             child: Icon(
                               icons[category] ?? Icons.shopping_bag,
                               size: 18.sp,
-                              color: selected
-                                  ? AppColors.primary
-                                  : Colors.grey.shade600,
+                              color: selected ? AppColors.primary : Colors.grey.shade600,
                             ),
                           ),
 
@@ -449,27 +438,14 @@ class DashboardView extends GetView<DashboardController> {
 
                           /// CATEGORY TEXT
                           Text(
-                            category == 'All'
-                                ? 'All'
-                                : category
-                                .split(' ')
-                                .first
-                                .replaceFirstMapped(
-                              RegExp(r'^.'),
-                                  (m) =>
-                                  m.group(0)!.toUpperCase(),
-                            ),
+                            category == 'All' ? 'All' : category.split(' ').first.replaceFirstMapped(RegExp(r'^.'), (m) => m.group(0)!.toUpperCase()),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 9.sp,
-                              fontWeight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                              color: selected
-                                  ? Colors.black87
-                                  : Colors.grey.shade600,
+                              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                              color: selected ? Colors.black87 : Colors.grey.shade600,
                             ),
                           ),
                         ],
