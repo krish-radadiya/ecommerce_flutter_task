@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/theme/app_colors.dart';
 import '../Fav/favorite_view.dart';
+import '../cart/cart_controller.dart';
 import '../cart/cart_view.dart';
 import '../dashboard_screen/dashboard_view.dart';
 import '../profile/provile_view.dart';
@@ -15,23 +16,23 @@ class BottomNavView extends GetView<BottomNavController> {
     return Obx(() {
       return WillPopScope(
         onWillPop: () async {
-          // 🔥 Handle Android back properly for nested nav
+          // Handle Android back for nested navigation
           final canPopNested =
               await Get.nestedKey(1)?.currentState?.maybePop() ?? false;
 
           if (canPopNested) return false;
 
-          // If on Home tab root → allow app exit
-          if (controller.currentIndex.value == 0) {
-            return true;
+          // If not on Home tab → go to Home
+          if (controller.currentIndex.value != 0) {
+            controller.changeIndex(0);
+            return false;
           }
 
-          // Otherwise switch to Home tab
-          controller.changeIndex(0);
-          return false;
+          // On Home root → allow exit
+          return true;
         },
         child: Scaffold(
-          extendBody: true, // floating nav effect
+          extendBody: true,
           body: IndexedStack(
             index: controller.currentIndex.value,
             children: [
@@ -39,7 +40,7 @@ class BottomNavView extends GetView<BottomNavController> {
               Navigator(
                 key: Get.nestedKey(1),
                 onGenerateRoute: (_) => GetPageRoute(
-                  page: () =>  DashboardView(), // ✅ const added
+                  page: () =>  DashboardView(),
                 ),
               ),
 
@@ -59,6 +60,7 @@ class BottomNavView extends GetView<BottomNavController> {
     });
   }
 
+  /// 🔥 Custom Floating Bottom Nav Bar
   Widget _buildBottomBar(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewPadding.bottom;
 
@@ -88,9 +90,16 @@ class BottomNavView extends GetView<BottomNavController> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             currentIndex: controller.currentIndex.value,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: Colors.grey,
+            showUnselectedLabels: false,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
             onTap: (index) {
+              // If same tab tapped
               if (index == controller.currentIndex.value) {
-                // 🔥 If Home reselected → pop to root
+                // If Home tapped again → pop to Dashboard
                 if (index == 0) {
                   Get.until((route) => route.isFirst, id: 1);
                 }
@@ -98,29 +107,90 @@ class BottomNavView extends GetView<BottomNavController> {
               }
               controller.changeIndex(index);
             },
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: AppColors.primary,
-            unselectedItemColor: Colors.grey,
-            showUnselectedLabels: false,
-            selectedFontSize: 12,
-            unselectedFontSize: 12,
-            items: const [
-              BottomNavigationBarItem(
+            items: [
+              /// HOME
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),
                 activeIcon: Icon(Icons.home),
                 label: 'Home',
               ),
+
+              /// CART (WITH BADGE)
               BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart_outlined),
-                activeIcon: Icon(Icons.shopping_cart),
                 label: 'Cart',
+                icon: Obx(() {
+                  final cartController = Get.find<CartController>();
+                  final count = cartController.cartItems.length;
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.shopping_cart_outlined),
+                      if (count > 0)
+                        Positioned(
+                          right: -6,
+                          top: -6,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              count.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                }),
+                activeIcon: Obx(() {
+                  final cartController = Get.find<CartController>();
+                  final count = cartController.cartItems.length;
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.shopping_cart),
+                      if (count > 0)
+                        Positioned(
+                          right: -6,
+                          top: -6,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              count.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                }),
               ),
-              BottomNavigationBarItem(
+
+              /// FAVORITE
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.favorite_border),
                 activeIcon: Icon(Icons.favorite),
                 label: 'Fav',
               ),
-              BottomNavigationBarItem(
+
+              /// PROFILE
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),
                 activeIcon: Icon(Icons.person),
                 label: 'Profile',

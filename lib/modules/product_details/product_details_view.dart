@@ -1,10 +1,11 @@
-// product_details_view.dart
+/// product_details_view.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../app/theme/app_colors.dart';
 import '../Fav/favourite_controller.dart';
+import '../cart/cart_controller.dart';
 import 'product_details_controller.dart';
 
 class ProductDetailsView extends GetView<ProductDetailsController> {
@@ -12,18 +13,13 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
 
   @override
   Widget build(BuildContext context) {
-    // Get FavoriteController
     final FavoriteController favoriteController = Get.find<FavoriteController>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F7F7),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            ),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         final product = controller.product;
@@ -31,283 +27,270 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
 
         return Column(
           children: [
-            // ================= IMAGE SECTION =================
-            Expanded(
-              flex: 4,
-              child: Container(
-                color: Colors.grey.shade50,
-                child: Stack(
-                  children: [
-                    // Product Image
-                    Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                        child: Image.network(
-                          product['image'],
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.image_not_supported,
-                              size: 50.sp,
-                              color: Colors.grey.shade400,
-                            );
-                          },
-                        ),
-                      ),
+            /// ================= IMAGE SECTION (FIXED) =================
+            Container(
+              height: 35.h,
+              width: double.infinity,
+              color: Colors.grey.shade200,
+              child: Stack(
+                children: [
+                  Center(
+                    child: Image.network(
+                      product['image'],
+                      height: 25.h,
+                      fit: BoxFit.contain,
                     ),
+                  ),
 
-                    // Top Bar - Back, Favorite, Share
-                    Positioned(
-                      top: 5.h,
-                      left: 4.w,
-                      right: 4.w,
+                  /// BACK
+                  Positioned(
+                    top: 5.h,
+                    left: 4.w,
+                    child: _circleIcon(Icons.arrow_back_ios_new, () => Get.back()),
+                  ),
+
+                  /// FAVORITE
+                  Positioned(
+                    top: 5.h,
+                    right: 4.w,
+                    child: Obx(() {
+                      final isFav = favoriteController.isFavorite(productId);
+                      return _circleIcon(
+                        isFav ? Icons.favorite : Icons.favorite_border,
+                            () => favoriteController.toggleFavorite(product),
+                        color: isFav ? const Color(0xFFFF6B35) : Colors.black,
+                      );
+                    }),
+                  ),
+
+                  /// SHARE
+                  Positioned(
+                    top: 5.h,
+                    right: 16.w,
+                    child: _circleIcon(Icons.share_outlined, () => _shareProduct(product)),
+                  ),
+                ],
+              ),
+            ),
+
+            /// ================= DETAILS SECTION (FIXED) =================
+            Expanded(
+              child: Stack(
+                children: [
+                  Container(
+                    padding: EdgeInsets.fromLTRB(5.w, 3.h, 5.w, 0),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// TITLE
+                        Text(
+                          product['title'],
+                          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
+                        ),
+
+                        SizedBox(height: 1.h),
+
+                        /// PRICE + SELLER
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "\$${product['price']}",
+                              style: TextStyle(
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            Text(
+                              "Seller: Syed Noman",
+                              style: TextStyle(fontSize: 10.sp, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 1.5.h),
+
+                        /// RATING
+                        Row(
+                          children: [
+                            const Icon(Icons.star, color: Color(0xFFFFC107)),
+                            SizedBox(width: 1.w),
+                            Text(
+                              product['rating']['rate'].toString(),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(width: 1.w),
+                            Text(
+                              "(${product['rating']['count']} Reviews)",
+                              style: TextStyle(fontSize: 10.sp, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 2.5.h),
+
+                        /// COLORS
+                        Text("Color", style: const TextStyle(fontWeight: FontWeight.w700)),
+                        SizedBox(height: 1.h),
+
+                        Obx(() => Row(
+                          children: List.generate(
+                            controller.colors.length,
+                                (index) {
+                              final selected = controller.selectedColor.value == index;
+                              return GestureDetector(
+                                onTap: () => controller.selectColor(index),
+                                child: Container(
+                                  margin: EdgeInsets.only(right: 3.w),
+                                  padding: EdgeInsets.all(0.8.w),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: selected ? AppColors.primary : Colors.transparent,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Container(
+                                    width: 6.w,
+                                    height: 6.w,
+                                    decoration: BoxDecoration(
+                                      color: controller.colors[index],
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )),
+
+                        SizedBox(height: 3.h),
+
+                        /// ================= TABS (FIXED) =================
+                        Obx(() => Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: List.generate(
+                            controller.tabs.length,
+                                (i) {
+                              final active = controller.selectedTab.value == i;
+                              return GestureDetector(
+                                onTap: () => controller.changeTab(i),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                                  decoration: BoxDecoration(
+                                    color: active ? AppColors.primary : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    controller.tabs[i],
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: active ? Colors.white : Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )),
+
+                        SizedBox(height: 2.h),
+
+                        /// ================= TAB CONTENT (SCROLLABLE) =================
+                        Expanded(
+                          child: Obx(() {
+                            return SingleChildScrollView(
+                              padding: EdgeInsets.only(bottom: 12.h),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (controller.selectedTab.value == 0)
+                                  /// DESCRIPTION
+                                    Text(
+                                      product['description'] ?? 'No description available',
+                                      style: const TextStyle(height: 1.6, color: Colors.black87),
+                                    )
+                                  else if (controller.selectedTab.value == 1)
+                                  /// SPECIFICATION
+                                    Text(
+                                      product['title'] ?? 'No specification available',
+                                      style: const TextStyle(height: 1.6, color: Colors.black87),
+                                    )
+                                  else
+                                  /// REVIEW
+                                    Text(
+                                      product['description'] ?? 'No reviews available',
+                                      style: const TextStyle(height: 1.6, color: Colors.black87),
+                                    ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// ================= ADD TO CART (FIXED AT BOTTOM) =================
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      height: 10.h,
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -4)),
+                        ],
+                      ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Back Button
-                          _buildIconButton(
-                            icon: Icons.arrow_back_ios_new,
-                            onTap: () => Get.back(),
+                          /// QTY
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 3.w),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                IconButton(onPressed: controller.decreaseQty, icon: const Icon(Icons.remove)),
+                                Obx(() => Text(controller.quantity.value.toString())),
+                                IconButton(onPressed: controller.increaseQty, icon: const Icon(Icons.add)),
+                              ],
+                            ),
                           ),
 
-                          // Favorite & Share Buttons
-                          Row(
-                            children: [
-                              // Favorite Button with Obx
-                              Obx(() {
-                                final isFav = favoriteController.isFavorite(productId);
+                          SizedBox(width: 4.w),
 
-                                return _buildIconButton(
-                                  icon: isFav ? Icons.favorite : Icons.favorite_border,
-                                  iconColor: isFav ? Color(0xFFFF6B35) : Colors.black87,
-                                  onTap: () {
-                                    favoriteController.toggleFavorite(product);
-
-                                    Get.snackbar(
-                                      isFav ? 'Removed' : 'Added',
-                                      isFav
-                                          ? 'Removed from favorites'
-                                          : 'Added to favorites',
-                                      snackPosition: SnackPosition.BOTTOM,
-                                      backgroundColor: Colors.black87,
-                                      colorText: Colors.white,
-                                      duration: Duration(seconds: 2),
-                                      margin: EdgeInsets.all(4.w),
-                                      borderRadius: 10,
-                                    );
-                                  },
-                                );
-                              }),
-
-                              SizedBox(width: 3.w),
-
-                              // Share Button
-                              _buildIconButton(
-                                icon: Icons.share_outlined,
-                                onTap: () {
-                                  _shareProduct(product);
-                                },
+                          /// ADD TO CART
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                padding: EdgeInsets.symmetric(vertical: 1.6.h),
                               ),
-                            ],
+                              onPressed: controller.addToCart,
+                              child: Text(
+                                "Add to Cart",
+                                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: Colors.white),
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ================= DETAILS SECTION =================
-            Expanded(
-              flex: 6,
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(30),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, -5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Category Badge
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        product['category'].toString().toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: 1.5.h),
-
-                    // Product Title
-                    Text(
-                      product['title'],
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black87,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    SizedBox(height: 1.h),
-
-                    // Rating
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: Color(0xFFFFC107), size: 16.sp),
-                        SizedBox(width: 1.w),
-                        Text(
-                          product['rating']['rate'].toString(),
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        SizedBox(width: 1.w),
-                        Text(
-                          '(${product['rating']['count']} reviews)',
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 2.h),
-
-                    // Price
-                    Text(
-                      "\$${product['price']}",
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-
-                    SizedBox(height: 2.5.h),
-
-                    // Color Label
-                    Text(
-                      "Available Colors",
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black87,
-                      ),
-                    ),
-
-                    SizedBox(height: 1.2.h),
-
-                    // Color Options
-                    Row(
-                      children: [
-                        _colorDot(Color(0xFFFF6B35), true),
-                        SizedBox(width: 3.w),
-                        _colorDot(Color(0xFF4ECDC4), false),
-                        SizedBox(width: 3.w),
-                        _colorDot(Color(0xFF95E1D3), false),
-                        SizedBox(width: 3.w),
-                        _colorDot(Color(0xFFFFC107), false),
-                        SizedBox(width: 3.w),
-                        _colorDot(Color(0xFF000000), false),
-                      ],
-                    ),
-
-                    SizedBox(height: 2.5.h),
-
-                    // Description Label
-                    Text(
-                      "Description",
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black87,
-                      ),
-                    ),
-
-                    SizedBox(height: 1.h),
-
-                    // Description Text
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Text(
-                          product['description'],
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            color: Colors.grey.shade700,
-                            height: 1.6,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: 2.h),
-
-                    // ================= ADD TO CART BUTTON =================
-                    SizedBox(
-                      width: double.infinity,
-                      height: 6.5.h,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
-                        ),
-                        onPressed: controller.addToCart,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.shopping_bag_outlined,
-                              color: Colors.white,
-                              size: 18.sp,
-                            ),
-                            SizedBox(width: 2.w),
-                            Text(
-                              "Add to Cart",
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ],
@@ -316,104 +299,22 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
     );
   }
 
-  // ================= ICON BUTTON =================
-  Widget _buildIconButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    Color? iconColor,
-  }) {
+  Widget _circleIcon(IconData icon, VoidCallback onTap, {Color? color}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 11.w,
-        height: 11.w,
-        decoration: BoxDecoration(
+        padding: EdgeInsets.all(2.w),
+        decoration: const BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: Offset(0, 3),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
         ),
-        child: Icon(
-          icon,
-          color: iconColor ?? Colors.black87,
-          size: 18.sp,
-        ),
+        child: Icon(icon, color: color ?? Colors.black),
       ),
     );
   }
 
-  // ================= COLOR DOT =================
-  Widget _colorDot(Color color, bool selected) {
-    return Container(
-      width: 10.w,
-      height: 10.w,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-        border: Border.all(
-          color: selected ? AppColors.primary : Colors.grey.shade300,
-          width: selected ? 3 : 2,
-        ),
-        boxShadow: selected
-            ? [
-          BoxShadow(
-            color: color.withOpacity(0.4),
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ]
-            : [],
-      ),
-      child: selected
-          ? Center(
-        child: Container(
-          width: 4.w,
-          height: 4.w,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-        ),
-      )
-          : null,
-    );
-  }
-
-  // ================= SHARE PRODUCT =================
-  void _shareProduct(Map<String, dynamic> product) {
-    final String shareText = '''
-🛍️ Check out this amazing product!
-
-📦 ${product['title']}
-
-💰 Price: \$${product['price']}
-⭐ Rating: ${product['rating']['rate']}/5 (${product['rating']['count']} reviews)
-
-📝 ${product['description']}
-
-🔗 Product Image: ${product['image']}
-    '''.trim();
-
-    Share.share(
-      shareText,
-      subject: product['title'],
-    );
-
-    Get.snackbar(
-      'Share',
-      'Product shared successfully',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      duration: Duration(seconds: 2),
-      margin: EdgeInsets.all(4.w),
-      borderRadius: 10,
-      icon: Icon(Icons.share, color: Colors.white),
-    );
+  void _shareProduct(Map product) {
+    Share.share("${product['title']} - \$${product['price']}");
   }
 }

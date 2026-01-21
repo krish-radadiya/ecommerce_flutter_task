@@ -1,10 +1,8 @@
-// product_details_controller.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:sizer/sizer.dart';
-import '../../app/routes/app_routes.dart';
 import '../cart/cart_controller.dart';
 
 class ProductDetailsController extends GetxController {
@@ -13,7 +11,25 @@ class ProductDetailsController extends GetxController {
   var isLoading = true.obs;
   var product = <String, dynamic>{}.obs;
 
-  final CartController cartController = Get.put(CartController());
+  /// ✅ FIX: DO NOT CREATE NEW CART CONTROLLER
+  final CartController cartController = Get.find<CartController>();
+
+  /// TAB MANAGEMENT
+  var selectedTab = 0.obs;
+  final List<String> tabs = ['Description', 'Specification', 'Review'];
+
+  /// COLOR MANAGEMENT
+  var selectedColor = 0.obs;
+  final List<Color> colors = [
+    const Color(0xFFFF6B35),
+    const Color(0xFF4ECDC4),
+    const Color(0xFF45B7D1),
+    const Color(0xFFFFC107),
+    const Color(0xFF9C27B0),
+  ];
+
+  /// QUANTITY
+  var quantity = 1.obs;
 
   @override
   void onInit() {
@@ -21,74 +37,59 @@ class ProductDetailsController extends GetxController {
     fetchProductDetails();
   }
 
-  /// FETCH PRODUCT DETAILS
   Future<void> fetchProductDetails() async {
     try {
       isLoading(true);
-      print("📦 Fetching product ID: $productId");
 
       final res = await http.get(
         Uri.parse('https://fakestoreapi.com/products/$productId'),
       );
 
-      print("📡 Status: ${res.statusCode}");
-
       if (res.statusCode == 200) {
         product.value = jsonDecode(res.body);
-        print("✅ Product loaded: ${product['title']}");
       } else {
-        print("❌ Failed to load product");
-        Get.snackbar(
-          'Error',
-          'Failed to load product details',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.snackbar('Error', 'Failed to load product');
       }
     } catch (e) {
-      print("❌ ERROR: $e");
-      Get.snackbar(
-        'Error',
-        'Something went wrong',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', 'Something went wrong');
     } finally {
       isLoading(false);
     }
   }
 
-  /// ADD TO CART
-  void addToCart() {
-    if (product.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Product not loaded',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
+  void changeTab(int index) => selectedTab.value = index;
+  void selectColor(int index) => selectedColor.value = index;
 
-    cartController.addToCart(product.value);
+  void increaseQty() => quantity.value++;
+
+  void decreaseQty() {
+    if (quantity.value > 1) {
+      quantity.value--;
+    }
+  }
+
+  /// ✅ FIXED ADD TO CART
+  void addToCart() {
+    if (product.isEmpty) return;
+
+    cartController.addToCartWithQuantity(
+      product.value,
+      quantity.value,
+    );
 
     Get.snackbar(
       "Added to Cart",
-      "${product['title']} added successfully",
+      "${product['title']} (x${quantity.value}) added",
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green,
       colorText: Colors.white,
       duration: const Duration(milliseconds: 1500),
       margin: EdgeInsets.all(4.w),
       borderRadius: 10,
-      icon: Icon(Icons.check_circle, color: Colors.white),
+      icon: const Icon(Icons.check_circle, color: Colors.white),
     );
 
-    // Navigate to cart after delay
-    Future.delayed(const Duration(milliseconds: 1600), () {
-      Get.toNamed(AppRoutes.CART);
-    });
-  }
-
-  /// REFRESH PRODUCT
-  Future<void> refreshProduct() async {
-    await fetchProductDetails();
+    /// ✅ RESET QTY AFTER ADD
+    quantity.value = 1;
   }
 }

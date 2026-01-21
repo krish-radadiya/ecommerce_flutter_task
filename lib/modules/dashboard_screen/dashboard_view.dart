@@ -15,7 +15,7 @@ class DashboardView extends GetView<DashboardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       body: SafeArea(
         child: Column(
           children: [
@@ -45,7 +45,7 @@ class DashboardView extends GetView<DashboardController> {
   // ------------------ APP BAR ------------------
   Widget _buildAppBar() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.8.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -66,7 +66,7 @@ class DashboardView extends GetView<DashboardController> {
 
   Widget _roundIcon(IconData icon) {
     return Container(
-      padding: EdgeInsets.all(2.3.w),
+      padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(52.w)),
       child: Icon(icon, size: 20.sp),
     );
@@ -75,11 +75,11 @@ class DashboardView extends GetView<DashboardController> {
   // ------------------ SEARCH ------------------
   Widget _buildSearchBar() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.2.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
       child: Container(
-        height: 6.5.h,
+        height: 5.8.h,
         padding: EdgeInsets.symmetric(horizontal: 4.w),
-        decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(16)),
         child: Row(
           children: [
             Icon(Icons.search, color: Colors.grey.shade600, size: 18.sp),
@@ -109,20 +109,27 @@ class DashboardView extends GetView<DashboardController> {
         final screenHeight = MediaQuery.of(context).size.height;
 
         return SizedBox(
-          height: screenHeight * 0.225, // 22.5% of screen height
+          height: screenHeight * 0.20, // ✅ reduced from 0.225 → 0.20
           child: PageView.builder(
             controller: PageController(viewportFraction: 0.92),
-            physics: BouncingScrollPhysics(),
+            physics: const BouncingScrollPhysics(),
             itemCount: _specialItems.length,
             itemBuilder: (context, index) {
               final item = _specialItems[index];
 
               return Container(
-                margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.02),
+                margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
                 decoration: BoxDecoration(
                   color: item['bgColor'],
                   borderRadius: BorderRadius.circular(24),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: Offset(0, 8), spreadRadius: -3)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                      spreadRadius: -3,
+                    )
+                  ],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
@@ -133,85 +140,112 @@ class DashboardView extends GetView<DashboardController> {
                         top: -30,
                         right: -30,
                         child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.08)),
+                          width: 110,
+                          height: 110,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.08),
+                          ),
                         ),
                       ),
                       Positioned(
-                        bottom: -40,
-                        left: -40,
+                        bottom: -35,
+                        left: -35,
                         child: Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.05)),
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.05),
+                          ),
                         ),
                       ),
 
                       /// MAIN CONTENT
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.02),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.04,
+                          vertical: screenHeight * 0.015, // 🔥 slightly reduced
+                        ),
                         child: Row(
                           children: [
                             /// LEFT CONTENT
                             Expanded(
                               flex: 6,
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   /// CATEGORY BADGE
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.025, vertical: screenHeight * 0.005),
-                                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.25), borderRadius: BorderRadius.circular(20)),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: screenWidth * 0.022,
+                                      vertical: screenHeight * 0.004,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.25),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
                                     child: Text(
                                       item['category'],
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontSize: screenWidth * 0.022,
+                                        fontSize: screenWidth * 0.021,
                                         fontWeight: FontWeight.w700,
                                         color: Colors.white,
-                                        letterSpacing: 0.5,
                                       ),
+                                    ),
+                                  ),
+
+                                  SizedBox(height: screenHeight * 0.008),
+
+                                  /// TITLE
+                                  Text(
+                                    item['title'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: true,
+                                    style: TextStyle(
+                                      fontSize: screenWidth * 0.047,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                      height: 1.1,
+                                    ),
+                                  ),
+
+                                  SizedBox(height: screenHeight * 0.004),
+
+                                  /// SUBTITLE
+                                  Text(
+                                    item['subtitle'],
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: screenWidth * 0.028,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white.withOpacity(0.95),
                                     ),
                                   ),
 
                                   SizedBox(height: screenHeight * 0.01),
 
-                                  /// TITLE
-                                  Text(
-                                    item['title'],
-                                    style: TextStyle(
-                                      fontSize: screenWidth * 0.05,
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.white,
-                                      height: 1.1,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  ),
-
-                                  SizedBox(height: screenHeight * 0.005),
-
-                                  /// SUBTITLE
-                                  Text(
-                                    item['subtitle'],
-                                    style: TextStyle(
-                                      fontSize: screenWidth * 0.03,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white.withOpacity(0.95),
-                                      height: 1.2,
-                                    ),
-                                  ),
-
-                                  SizedBox(height: screenHeight * 0.015),
-
                                   /// SHOP NOW BUTTON
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: screenHeight * 0.01),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: screenWidth * 0.045,
+                                      vertical: screenHeight * 0.008,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(25),
-                                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: Offset(0, 4))],
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.15),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        )
+                                      ],
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -219,14 +253,17 @@ class DashboardView extends GetView<DashboardController> {
                                         Text(
                                           item['button'],
                                           style: TextStyle(
-                                            fontSize: screenWidth * 0.028,
+                                            fontSize: screenWidth * 0.026,
                                             fontWeight: FontWeight.w800,
                                             color: item['bgColor'],
-                                            letterSpacing: 0.5,
                                           ),
                                         ),
-                                        SizedBox(width: screenWidth * 0.01),
-                                        Icon(Icons.arrow_forward_rounded, color: item['bgColor'], size: screenWidth * 0.038),
+                                        SizedBox(width: screenWidth * 0.008),
+                                        Icon(
+                                          Icons.arrow_forward_rounded,
+                                          color: item['bgColor'],
+                                          size: screenWidth * 0.034,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -234,16 +271,22 @@ class DashboardView extends GetView<DashboardController> {
                               ),
                             ),
 
-                            SizedBox(width: screenWidth * 0.03),
+                            SizedBox(width: screenWidth * 0.025),
 
-                            /// RIGHT IMAGE
+                            /// RIGHT IMAGE (slightly smaller)
                             Expanded(
                               flex: 5,
                               child: Container(
-                                height: screenHeight * 0.16,
+                                height: screenHeight * 0.145, // 🔥 reduced
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(18),
-                                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 15, offset: Offset(-3, 5))],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.25),
+                                      blurRadius: 15,
+                                      offset: const Offset(-3, 5),
+                                    )
+                                  ],
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(18),
@@ -252,10 +295,10 @@ class DashboardView extends GetView<DashboardController> {
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) {
                                       return Container(
-                                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(18)),
+                                        color: Colors.white.withOpacity(0.2),
                                         child: Icon(
                                           Icons.image_not_supported_outlined,
-                                          size: screenWidth * 0.095,
+                                          size: screenWidth * 0.085,
                                           color: Colors.white.withOpacity(0.6),
                                         ),
                                       );
@@ -268,29 +311,33 @@ class DashboardView extends GetView<DashboardController> {
                         ),
                       ),
 
-                      /// DISCOUNT BADGE - Top Right
+                      /// DISCOUNT BADGE
                       Positioned(
-                        top: screenWidth * 0.03,
-                        right: screenWidth * 0.03,
+                        top: screenWidth * 0.025,
+                        right: screenWidth * 0.025,
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: screenHeight * 0.008),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.028,
+                            vertical: screenHeight * 0.006,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: Offset(0, 3))],
                           ),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.local_offer_rounded, size: screenWidth * 0.03, color: item['bgColor']),
-                              SizedBox(width: screenWidth * 0.01),
+                              Icon(
+                                Icons.local_offer_rounded,
+                                size: screenWidth * 0.028,
+                                color: item['bgColor'],
+                              ),
+                              SizedBox(width: screenWidth * 0.008),
                               Text(
                                 item['discount'],
                                 style: TextStyle(
-                                  fontSize: screenWidth * 0.025,
+                                  fontSize: screenWidth * 0.024,
                                   fontWeight: FontWeight.w900,
                                   color: item['bgColor'],
-                                  letterSpacing: 0.3,
                                 ),
                               ),
                             ],
@@ -298,21 +345,25 @@ class DashboardView extends GetView<DashboardController> {
                         ),
                       ),
 
-                      /// DOT INDICATORS - Bottom Left
+                      /// DOT INDICATOR
                       Positioned(
-                        bottom: screenHeight * 0.02,
+                        bottom: screenHeight * 0.015,
                         left: screenWidth * 0.04,
                         child: Row(
                           children: List.generate(
                             _specialItems.length,
-                            (dotIndex) => AnimatedContainer(
-                              duration: Duration(milliseconds: 300),
-                              width: dotIndex == index ? screenWidth * 0.05 : screenWidth * 0.015,
-                              height: screenHeight * 0.01,
+                                (dotIndex) => AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              width: dotIndex == index
+                                  ? screenWidth * 0.045
+                                  : screenWidth * 0.014,
+                              height: screenHeight * 0.008,
                               margin: EdgeInsets.only(right: screenWidth * 0.01),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: dotIndex == index ? Colors.white : Colors.white.withOpacity(0.35),
+                                color: dotIndex == index
+                                    ? Colors.white
+                                    : Colors.white.withOpacity(0.35),
                               ),
                             ),
                           ),
@@ -372,13 +423,12 @@ class DashboardView extends GetView<DashboardController> {
 
   // Updated Special Items Data
   // ------------------ CATEGORIES ------------------
-  // ------------------ CATEGORIES ------------------
   Widget _buildCategoriesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
           child: Text(
             'Category',
             style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Colors.black87),
@@ -390,8 +440,8 @@ class DashboardView extends GetView<DashboardController> {
           }
 
           final icons = {
-            'All': Icons.grid_view_rounded,
-            'electronics': Icons.devices,
+            'All': Icons.grid_view,
+            'electronics': Icons.headphones,
             'jewelery': Icons.diamond,
             'men\'s clothing': Icons.checkroom,
             'women\'s clothing': Icons.woman,
@@ -400,10 +450,10 @@ class DashboardView extends GetView<DashboardController> {
           final categories = ['All', ...controller.categories];
 
           return SizedBox(
-            height: 10.5.h,
+            height: 9.5.h,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              padding: EdgeInsets.symmetric(horizontal: 3.w),
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 final category = categories[index];
@@ -415,23 +465,19 @@ class DashboardView extends GetView<DashboardController> {
                     onTap: () => controller.selectCategory(category),
                     child: Container(
                       width: 18.w,
-                      margin: EdgeInsets.only(right: 3.w),
+                      margin: EdgeInsets.only(right: 0.5.w),
                       child: Column(
                         children: [
                           /// ICON CONTAINER (NO SHADOW, ONLY BORDER)
                           Container(
-                            width: 15.w,
-                            height: 15.w,
+                            width: 13.w,
+                            height: 13.w,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white,
+                              color: Colors.grey.shade200,
                               border: Border.all(color: selected ? AppColors.primary : Colors.grey.shade300, width: selected ? 2 : 1.2),
                             ),
-                            child: Icon(
-                              icons[category] ?? Icons.shopping_bag,
-                              size: 18.sp,
-                              color: selected ? AppColors.primary : Colors.grey.shade600,
-                            ),
+                            child: Icon(icons[category] ?? Icons.shopping_bag, size: 18.sp, color: selected ? Colors.black : Colors.grey.shade600),
                           ),
 
                           SizedBox(height: 0.9.h),
@@ -444,8 +490,8 @@ class DashboardView extends GetView<DashboardController> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 9.sp,
-                              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                              color: selected ? Colors.black87 : Colors.grey.shade600,
+                              fontWeight: selected ? FontWeight.w900 : FontWeight.w500,
+                              color: selected ? Colors.black : Colors.grey.shade600,
                             ),
                           ),
                         ],
@@ -464,7 +510,7 @@ class DashboardView extends GetView<DashboardController> {
   // ------------------ HEADER ------------------
   Widget _buildSectionHeader() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -476,10 +522,9 @@ class DashboardView extends GetView<DashboardController> {
             children: [
               Text(
                 'See All',
-                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
+                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: Colors.grey),
               ),
               SizedBox(width: 1.w),
-              Icon(Icons.arrow_forward_ios, size: 11.sp, color: AppColors.primary),
             ],
           ),
         ],
@@ -519,12 +564,12 @@ class DashboardView extends GetView<DashboardController> {
       return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.all(4.w),
+        padding: EdgeInsets.all(3.w),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 3.w,
           mainAxisSpacing: 3.w,
-          childAspectRatio: 0.68,
+          childAspectRatio: 0.70,
         ),
         itemCount: products.length,
         itemBuilder: (context, index) {
@@ -550,7 +595,7 @@ class DashboardView extends GetView<DashboardController> {
                     flex: 5,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
+                        color: Colors.grey.shade200,
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                       ),
                       child: Stack(
@@ -613,54 +658,33 @@ class DashboardView extends GetView<DashboardController> {
 
                   // ================= DETAILS =================
                   Padding(
-                    padding: EdgeInsets.all(2.8.w),
+                    padding: EdgeInsets.all(2.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           product['title'].length > 28 ? '${product['title'].substring(0, 28)}...' : product['title'],
-                          style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w600, color: Colors.black87, height: 1.3),
-                          maxLines: 2,
+                          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: Colors.black87, height: 1.3),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 0.8.h),
+                        SizedBox(height: 1.h),
 
                         // 🎨 COLOR DOTS (UI SAME)
                         Row(
                           children: [
-                            _buildColorDot(const Color(0xFFFF6B35)),
-                            SizedBox(width: 1.5.w),
-                            _buildColorDot(const Color(0xFF4ECDC4)),
-                            SizedBox(width: 1.5.w),
-                            _buildColorDot(const Color(0xFF95E1D3)),
-                            SizedBox(width: 1.5.w),
-                            _buildColorDot(const Color(0xFFFFC107)),
-                          ],
-                        ),
-                        SizedBox(height: 1.h),
-
-                        // PRICE + RATING
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
                             Text(
                               '\$${product['price']}',
-                              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: Colors.black),
+                              style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: Colors.black),
                             ),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.3.h),
-                              decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(6)),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.star, color: const Color(0xFFFFC107), size: 11.sp),
-                                  SizedBox(width: 0.5.w),
-                                  Text(
-                                    product['rating']['rate'].toString(),
-                                    style: TextStyle(fontSize: 9.sp, color: Colors.grey.shade800, fontWeight: FontWeight.w600),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            Spacer(),
+                            _buildColorDot(const Color(0xFFFF6B35)),
+                            SizedBox(width: 0.5.w),
+                            _buildColorDot(const Color(0xFF4ECDC4)),
+                            SizedBox(width: 0.5.w),
+                            _buildColorDot(const Color(0xFF95E1D3)),
+                            SizedBox(width: 0.5.w),
+                            _buildColorDot(const Color(0xFFFFC107)),
                           ],
                         ),
                       ],
@@ -678,8 +702,8 @@ class DashboardView extends GetView<DashboardController> {
 
 Widget _buildColorDot(Color color) {
   return Container(
-    width: 4.5.w,
-    height: 4.5.w,
+    width: 4.w,
+    height: 4.w,
     decoration: BoxDecoration(
       color: color,
       shape: BoxShape.circle,

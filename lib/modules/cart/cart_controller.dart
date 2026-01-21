@@ -1,4 +1,4 @@
-// cart_controller.dart
+/// cart_controller.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -72,6 +72,27 @@ class CartController extends GetxController {
     _saveCartToStorage();
   }
 
+  /// ADD TO CART WITH CUSTOM QUANTITY
+  void addToCartWithQuantity(Map<String, dynamic> product, int qty) {
+    final index = cartItems.indexWhere((item) => item['id'] == product['id']);
+
+    if (index != -1) {
+      // Product already exists, add to existing quantity
+      cartItems[index]['quantity'] += qty;
+      cartItems.refresh();
+      print("➕ Quantity increased by $qty for: ${product['title']}");
+    } else {
+      // Add new product with specified quantity
+      cartItems.add({
+        ...product,
+        'quantity': qty,
+      });
+      print("✅ Added to cart: ${product['title']} with quantity $qty");
+    }
+
+    _saveCartToStorage();
+  }
+
   /// INCREMENT QUANTITY
   void increment(int index) {
     if (index >= 0 && index < cartItems.length) {
@@ -108,18 +129,6 @@ class CartController extends GetxController {
       _saveCartToStorage();
 
       print("🗑️ Removed from cart: ${removedItem['title']}");
-      //
-      // Get.snackbar(
-      //   'Removed',
-      //   '${removedItem['title']} removed from cart',
-      //   snackPosition: SnackPosition.BOTTOM,
-      //   backgroundColor: Colors.black87,
-      //   colorText: Colors.white,
-      //   duration: Duration(seconds: 2),
-      //   margin: EdgeInsets.all(4.w),
-      //   borderRadius: 10,
-      //   icon: Icon(Icons.delete_outline, color: Colors.white),
-      // );
     }
   }
 
@@ -130,18 +139,6 @@ class CartController extends GetxController {
     _saveCartToStorage();
 
     print("🗑️ Cart cleared");
-
-    // Get.snackbar(
-    //   'Cart Cleared',
-    //   'All items removed from cart',
-    //   snackPosition: SnackPosition.BOTTOM,
-    //   backgroundColor: Colors.black87,
-    //   colorText: Colors.white,
-    //   duration: Duration(seconds: 2),
-    //   margin: EdgeInsets.all(4.w),
-    //   borderRadius: 10,
-    //   icon: Icon(Icons.delete_sweep, color: Colors.white),
-    // );
   }
 
   /// GET TOTAL AMOUNT
